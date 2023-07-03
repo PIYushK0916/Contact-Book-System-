@@ -1,0 +1,396 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <windows.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdbool.h>
+
+#define MAX_NAME_LEN 50
+#define MAX_CONTACTS 100
+#define MAX_PASS_LENGTH 20
+#define MAX_DOB_LEN 100
+
+void registration();
+void login();
+void add_email_to_file(char *email);
+int is_valid_email(char *email);
+void customer_interface();
+void emergency();
+void mail();
+void date();
+void ErrorAndRestart(char *error[100]);
+void ex_it();
+void add_contact();
+void view_all();
+void search();
+void quick_dial();
+void ErrorAndRestart(char *error[100]);
+void GoBackOrExit();
+
+typedef struct 
+{
+ char name[MAX_NAME_LEN];
+ char pass[MAX_PASS_LENGTH];
+}Member;
+int readMembers(Member members[])
+{
+ FILE *fptr;
+ int count = 0;
+ fptr = fopen("members.txt", "rb");
+ if (fptr == NULL) 
+ {printf("Error opening file.\n");exit(1);}
+ while(fscanf(fptr,"%s %s",members[count].name,members[count].pass)!= EOF)
+ {count++;}
+ fclose(fptr);
+ return count;
+}
+void writeMembers(Member members[], int count)
+{
+ FILE *fptr;int i;
+ fptr = fopen("members.txt", "wb");
+ if (fptr == NULL) 
+ {printf("Error opening file.\n");exit(1);}
+ for (i = 0; i < count; i++)
+ {
+  fprintf(fptr, "%s %s\n", members[i].name, members[i].pass);
+ }
+  fclose(fptr);
+}
+
+void main()
+{
+ int choice;
+ printf("\n\t|||||||||||[][][][][][][][][][][][][][][][][][][][][][][][][][][][][]|||||||||||");
+ printf("\n\t||||||||||[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][]||||||||||");
+ printf("\n\t|||||||||||[][][][][]|                                    |[][][][][]|||||||||||");
+ printf("\n\t||||||||||[][][][][][]      WELCOME TO CONTACT BOOK       [][][][][][]||||||||||");
+ printf("\n\t|||||||||||[][][][][]|                                    |[][][][][]|||||||||||");
+ printf("\n\t||||||||||[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][]||||||||||");
+ printf("\n\t|||||||||||[][][][][][][][][][][][][][][][][][][][][][][][][][][][][]|||||||||||\n\n\n\n");
+ printf("\t================================================================================\n\n");
+ printf("\t[1]---> REGISTRATION\n");
+ printf("\t[2]---> LOGIN\n");
+ printf("\t[3]---> EXIT\n\n");  
+ printf("\t[_]---> Enter your choice : ");
+ scanf("%d", &choice);
+ printf("\n\t================================================================================\n\n");
+ switch(choice) 
+ {
+  case 1 : registration();
+           break;
+  case 2 : login();
+           break;
+  case 3 : ex_it();
+           break;
+  default : printf("Invalid choice");
+ }
+}
+
+void registration()
+{ 
+ FILE *fp;
+ char firstname[50];
+ char lastname[50];
+ char username[50];
+ char password[20];
+ 
+ fp=fopen("members.txt","a");
+ if(fp == NULL)
+ {
+  printf("Error 404 !! FILE NOT FOUND !!\n");   
+  exit(1);             
+ }
+  printf("\n\n\t================================================================================\n");
+  printf("\t|                                  REGISTRATION                                |\n");
+  printf("\t================================================================================");
+  printf("\n\n\t------> Enter your FIRSTNAME : ");
+  scanf("%s",firstname);
+  printf("\t------> Enter your LASTNAME  : ");
+  scanf("%s",lastname);
+  printf("\t------> Enter your USERNAME  : ");
+  scanf("%s",username);
+  printf("\t------> Enter your PASSWORD  : ");
+  scanf("%s",password);
+  fprintf(fp, "%s %s %s %s\n",username,password,firstname,lastname);
+  fclose(fp);
+  printf("\n\t------> User registered SUCCESSFULLY");
+  printf("\n\t================================================================================\n\n\n\n\n");
+  login();             
+}
+void login()
+{
+ printf("\n\n\t================================================================================\n");
+ printf("\t|                                    LOGIN                                     |\n");
+ printf("\t================================================================================\n\n");
+ Member members[MAX_CONTACTS];
+ int count, i;
+ char name[MAX_NAME_LEN], pass[MAX_PASS_LENGTH];
+ count = readMembers(members);
+ printf("\t------> Enter your USERNAME  : ");
+ scanf("%s", name);
+ printf("\t------> Enter your PASSWORD  : ");
+ scanf("%s", pass);
+ for (i = 0; i < count; i++)
+ {
+  if(strcmp(members[i].name,name)==0&&strcmp(members[i].pass,pass)==0) 
+  {
+   printf("\n\t------> User Login SUCCESSFULLY!  Welcome, %s.",members[i].name);
+   printf("\n\t================================================================================\n\n\n\n\n");
+   customer_interface();
+   return;
+  }
+ }
+  printf("\n\tInvalid USERNAME or PASSWORD\n\n");
+  printf("\tLogin Again  !?!");
+  printf("\n\t================================================================================\n\n\n\n\n");
+  login();
+}
+void mail() 
+{
+ char email[50];
+ printf("\t------> Enter  E-MAIL Add     : \t");
+ scanf("%s",email);
+ if (!is_valid_email(email)) {
+ printf("Invalid email format.\n");
+ mail();
+ return ;
+ }
+  FILE *file = fopen("contacts.txt", "a");
+  fprintf(file,"%s\t", email);
+  fclose(file);
+}
+
+int is_valid_email(char *email) 
+{
+ char *at = strchr(email, '@');
+ char *dot = strchr(email, '.');
+ return (at != NULL && dot != NULL && at < dot);
+}
+void customer_interface()
+{
+ int choice;
+ printf("\t||||||||||||[][][][][][][][][][][][][][][][][][][][][][][][][][][][]||||||||||||\n");
+ printf("\t|||||||||||[][][][][]          --- MAIN MENU ---           [][][][][]|||||||||||\n");
+ printf("\t||||||||||||[][][][][][][][][][][][][][][][][][][][][][][][][][][][]||||||||||||\n\n");
+ printf("\t[1]---> ADD NEW CONTACTS\n");
+ printf("\t[2]---> VIEW ALL CONTACTS\n");
+ printf("\t[3]---> SEARCH FOR CONTACTS\n");
+ printf("\t[4]---> EMERGENCY CONTACTS\n");
+ printf("\t[5]---> QUICK DIAL\n");
+ printf("\t[6]---> LOGOUT\n\n");
+ printf("\t[_]---> Enter your choice : ");
+ scanf("%d", &choice);
+ printf("\n\t================================================================================\n\n");
+ switch(choice) 
+ {
+  case 1 : add_contact();
+           break;
+  case 2 : view_all();
+           break;
+  case 3 : search();
+           break;
+  case 4 : emergency();
+           break;
+  case 5 : quick_dial();
+           break;
+  case 6 : main();
+           break;
+  default : printf("Invalid choice\n");
+ }
+}
+
+void add_contact()
+{
+ FILE *fp;
+ int i;
+ char first_name[20];
+ char last_name[20];
+ char email[50];
+ char phone[15];
+ char notes[100];
+ char dob[10];
+ char add[50];
+
+ printf("\n\n\t================================================================================\n");
+ printf("\t|                                ADD NEW CONTACT                               |\n");
+ printf("\t================================================================================\n");
+ fp = fopen("contacts.txt", "a");
+ printf("\n\t------> Enter FIRSTNAME       : ");
+ scanf("%s",first_name);
+ fprintf(fp,"%s ",first_name);
+ printf("\t------> Enter LASTNAME        : ");
+ scanf("%s",last_name);
+ fprintf(fp,"%s ",last_name);
+ printf("\t------> Enter Your PHONE NO.   : ");
+ scanf("%s",phone);
+ if(strlen(phone)!=10)
+ {
+  for(i=strlen(phone);i<10 || i>10;)
+  {
+   printf("\t------> Enter PHONE NO. again : ");
+   scanf("%s",phone);
+   if(strlen(phone)==10)
+   {fprintf(fp,"%s\t",phone);fclose(fp);
+    break;}
+  }
+  }
+   else if(strlen(phone)==10)
+   {fprintf(fp,"%s\t",phone);fclose(fp);}
+ mail();
+ FILE *fptr=fopen("contacts.txt", "a");
+ printf("\t------> DOB (DD/MM/YYYY*)     : ");
+ scanf("%s",dob);
+ fprintf(fptr,"%s ",dob);
+ 
+ printf("\t------> Enter Adderess        : ");
+ scanf("%s",add);
+ fprintf(fptr,"%s ",add);
+ printf("\t------> Add NOTES to Contact  : ");
+ scanf("%s",notes);
+ fprintf(fptr,"%s\n",notes);
+ fclose(fptr);
+ printf("\n\t------> Contact Added SUCCESSFULLY");
+ printf("\n\t================================================================================\n\n\n\n\n");
+ customer_interface();
+}
+void view_all()
+{
+ FILE *fp;
+ char first_name[20];
+ char last_name[20];
+ char email[50];
+ char phone[15];
+ char notes[100];
+ char dob[10];
+ char add[50];
+
+ printf("\n\n\t================================================================================\n");
+ printf("\t|                               LIST ALL CONTACT                               |\n");
+ printf("\t================================================================================");
+ fp = fopen("contacts.txt", "r");      
+ printf("\n\t--------------------------------------------------------------------------------");
+ printf("\n\t--------------------------------------------------------------------------------");
+ while(fscanf(fp, "%s %s %s %s %s %s %s",first_name,last_name,phone,email,dob,notes,add) != EOF) 
+ {
+  printf("\n\tFIRSTNAME        : %s",first_name);
+  printf("\n\tLASTNAME         : %s",last_name);
+  printf("\n\tMOBILE NO.       : %s",phone);
+  printf("\n\tE-mail Address   : %s",email);
+  printf("\n\tDOB (DD/MM/YYYY) : %s",dob);
+  printf("\n\tNotes Added      : %s",notes);
+  printf("\n\tAddress          : %s\n",add );
+  printf("\t--------------------------------------------------------------------------------\n");
+  printf("\t--------------------------------------------------------------------------------");
+ }
+  fclose(fp);
+  printf("\n\t================================================================================\n\n\n\n\n");
+  customer_interface();
+}
+void search()
+{
+    printf("\n\t\t **** Search Contact ****\n\n");
+
+    int FoundContact = 0;
+    char Name[100];
+    printf("*Name should be maximum 20 characters long.\n");
+    printf("Enter The Name: ");
+    scanf(" %[^\n]s",Name);
+    if(strlen(Name) > 20){
+        ErrorAndRestart("!!!!Name Length Error!!!");
+        return;
+    }
+    strcat(Name,"\n");
+
+    FILE *fp;
+    int LineLength = 255;
+    char Line[LineLength];
+    fp = fopen("contacts.txt", "r");
+    int LineCount = 0;
+    int NeedToPrintLine = 0;
+    while(fgets(Line, LineLength, fp)) {
+       LineCount++;
+        if(LineCount == 1 && strcmp(Name, Line) == 0){
+            FoundContact = 1;
+            NeedToPrintLine = 3;
+        }
+        if(NeedToPrintLine > 0){
+            if(LineCount==1){
+                printf("\nContact information of %s",Name);
+                printf("\nName: %s",Line);
+                NeedToPrintLine = 2;
+            }else if(LineCount == 2){
+                printf("Phone: %s",Line);
+                NeedToPrintLine = 1;
+            }else if(LineCount == 3){
+                printf("Email: %s\n",Line);
+                NeedToPrintLine = 0;
+            }
+        }
+        if(LineCount == 3){
+            LineCount=0;
+        }
+    }
+    fclose(fp);
+    if(FoundContact == 0){
+        printf("\nSorry no contact found for %s\n",Name);
+    }
+    GoBackOrExit();
+    customer_interface();
+   }
+void quick_dial()
+{
+customer_interface();
+}
+void emergency()
+{
+ printf("\n\n\t================================================================================\n");
+ printf("\t|                              EMERGENCY CONTACTS                              |\n");
+ printf("\t================================================================================");
+ printf("\n\t------> National Emergency No. : 112\n");
+ printf("\n\t------> Police Station         : 100\n");
+ printf("\n\t------> COVID-19 Helpline      : 011-23978046/1075 \n");
+ printf("\n\t------> Ambulance Helpline     : 08/102/108\n");
+ printf("\n\t------> Fire station           : 101\n");
+ printf("\n\t------> Railway Helpline       : 1512/139\n");
+ printf("\n\t------> Child Helpline         : +91-712-2520699\n");
+ printf("\n\t------> Womens Helpline        : 1091/181\n");
+ printf("\n\t------> hospital helpline      : 104\n");
+ printf("\n\t------> Blood Bank             : 1910\n");
+ printf("\n\t------> LPG Leak Helpline      : 1906\n");
+ printf("\n\t------> Diasater Helpline      : 1077\n");
+ printf("\n\t------> Muncipal Corporation   : 1800 1030 222\n");
+ printf("\n\t------> Cyber Crime            : 020-29710097\n\n");
+ printf("\t================================================================================\n\n\n\n\n");
+ customer_interface();
+
+}
+void ex_it()
+{
+ printf("\n\t================================================================================\n\n");
+ printf("\n\t------> EXITING FROM THE SYSTEM.......");
+ printf("\n\t================================================================================\n\n\n\n\n");
+}
+
+void ErrorAndRestart(char *error[100]){
+    printf("%s\n",error);
+    int i = 0;
+    printf("Restarting the program: ");
+    for(i=0;i<10;i++){
+        printf(".");
+        Sleep(500);
+    }
+    system("cls");
+    main();
+}
+
+void GoBackOrExit(){
+    char option;
+    getchar();
+    printf("Go Back(b)? or Exit(0)?");
+    scanf("%c",&option);
+    if(option=='0'){
+        ex_it();
+    }else{
+        system("cls");
+    }
+}
